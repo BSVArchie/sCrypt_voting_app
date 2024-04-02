@@ -1,7 +1,7 @@
 import { writeFileSync } from 'fs'
-import { Voting } from '../src/contracts/voting'
+import { Voting, Name} from '../src/contracts/voting'
 import { privateKey } from './privateKey'
-import { bsv, TestWallet, DefaultProvider, sha256 } from 'scrypt-ts'
+import { bsv, TestWallet, DefaultProvider, sha256, FixedArray, toByteString } from 'scrypt-ts'
 
 function getScriptHash(scriptPubKeyHex: string) {
     const res = sha256(scriptPubKeyHex).match(/.{2}/g)
@@ -14,18 +14,21 @@ function getScriptHash(scriptPubKeyHex: string) {
 async function main() {
     await Voting.loadArtifact()
 
-    // Prepare signer. 
+    // Prepare signer.
     // See https://scrypt.io/docs/how-to-deploy-and-call-a-contract/#prepare-a-signer-and-provider
     const signer = new TestWallet(privateKey, new DefaultProvider({
         network: bsv.Networks.testnet
     }))
 
-    // TODO: Adjust the amount of satoshis locked in the smart contract:
-    const amount = 100
-
+    // Adjust the amount of satoshis locked in the smart contract:
+    const amount = 1
+    // const N = 2
+    const names: FixedArray<Name, 2> = [
+        toByteString('iPhone', true),
+        toByteString('Android', true)
+    ]
     const instance = new Voting(
-        // TODO: Pass constructor parameter values.
-        0n
+        names
     )
 
     // Connect to a signer.
